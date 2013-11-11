@@ -9,7 +9,12 @@
 #  updated_at :datetime         not null
 #
 
+
 class User < ActiveRecord::Base
+  
+  cattr_reader :per_page
+  @@per_page = 5
+
   attr_accessible :name, :email, :password, :password_confirmation
     has_secure_password
     
