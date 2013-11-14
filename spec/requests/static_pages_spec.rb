@@ -1,5 +1,6 @@
 require 'spec_helper'
-
+require 'action_view'
+include ActionView::Helpers::TextHelper
 describe "Static pages" do
 
   subject { page }
@@ -17,7 +18,48 @@ describe "Static pages" do
 
     it_should_behave_like "all static pages"
     it { should_not have_selector 'title', text: '| Home' }
-  end
+
+    describe "for signin users" do
+      let(:user) { FactoryGirl.create(:user) }
+      before do
+       50.times { FactoryGirl.create(:micropost, user: user,content: "Lorem ipsum") } 
+        sign_in user
+        visit root_path
+      end
+      describe "should have microposts"  do  
+        ##it { should have_content("micropost".pluralize(user.microposts.count))  }
+        it { should have_content(pluralize(user.microposts.count,"micropost")) }
+      end
+
+      describe "check pagination feed" do
+      
+        it { should have_selector('div.pagination') }
+
+        it "should list each post" do
+          user.feed.paginate(page: 1).each do |item|
+            page.should have_selector('li', text: item.content)
+          end
+        end
+      end
+    end
+    describe "delete links" do
+      let(:user) { FactoryGirl.create(:user) }
+      let(:otheruser) { FactoryGirl.create(:user) }
+      before do
+        FactoryGirl.create(:micropost, user: user,content: "Lorem ipsum")
+        sign_in otheruser
+        visit root_path
+      end
+      it { should_not have_link('delete', href: user_path(user)) }
+    end
+
+
+    
+    
+
+
+
+ end
 
   describe "Help page" do
     before { visit help_path }
