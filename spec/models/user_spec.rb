@@ -220,5 +220,26 @@ describe "when name is too long" do
       it { should_not be_following(other_user) }
       its(:followed_users) { should_not include(other_user) }
     end
+
+    it "should destroy associated relationships" do
+      relationships = @user.relationships
+      @user.destroy
+      relationships.should be_empty
+    end
+    it "should destroy associated reverse relationships" do
+      reverse_relationships = @user.reverse_relationships
+      @user.destroy
+      reverse_relationships.should be_empty
+    end
+    it "should destroy associated followed_users and followers" do
+     @user.destroy
+     @user.relationships.present?.should be_false
+     @user.reverse_relationships.present?.should be_false
+
+     expect(other_user.followers).not_to include(@user)
+     expect(other_user.followed_users).not_to include(@user)
+   end
+
+
   end
 end
